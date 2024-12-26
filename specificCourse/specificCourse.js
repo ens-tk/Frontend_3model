@@ -277,13 +277,13 @@ async function loadModal() {
         });
 
         const course = await fetchCourseDetails();
-
+        let courseNameInput, startYearInput, maximumStudentsCountInput, semesterSelect, courseInstructorSelect;
         if (isAdmin) {
-            const courseNameInput = document.getElementById('name');
-            const startYearInput = document.getElementById('startYear');
-            const maximumStudentsCountInput = document.getElementById('maximumStudentsCount');
-            const semesterSelect = document.getElementById('semester');
-            const courseInstructorSelect = document.getElementById('instructor');
+             courseNameInput = document.getElementById('name');
+             startYearInput = document.getElementById('startYear');
+             maximumStudentsCountInput = document.getElementById('maximumStudentsCount');
+             semesterSelect = document.getElementById('semester');
+             courseInstructorSelect = document.getElementById('instructor');
 
             courseNameInput.value = course.name;
             startYearInput.value = course.startYear;
