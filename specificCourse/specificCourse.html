@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Информация о курсе</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 id="courseName" class="text-center">Название курса</h1>
+            <button class="btn btn-primary" id="editCourseBtn" style="display: none;">Редактировать курс</button>
+            
+        </div>
+        <div class="col-md-6">
+            <p><strong>Основной год:</strong> <span id="courseYear">2026-2027</span></p>
+        </div>
+        <div class="col-md-6 d-flex align-items-center">
+            <p class="mb-0"><strong>Статус курса:</strong> <span id="courseStatus" class="badge"></span></p>
+            <button class="btn btn-link ms-3" id="changeStatusBtn" style="display: none;" data-bs-toggle="modal" data-bs-target="#statusModal">Изменить</button>
+        </div>
+    </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <p><strong>Семестр:</strong> <span id="semester">Осенний</span></p>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <p><strong>Места:</strong> <span id="availableSpots">30</span></p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Зачислено студентов:</strong> <span id="studentsEnrolled">12</span></p>
+            </div>
+        </div>
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <p><strong>Студентов на рассмотрении:</strong> <span id="studentsInQueue">5</span></p>
+            </div>
+        </div>
+
+        <ul class="nav nav-tabs" id="courseTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="requirements-tab" data-bs-toggle="tab" data-bs-target="#requirements" type="button" role="tab" aria-controls="requirements" aria-selected="true">Требования</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="annotations-tab" data-bs-toggle="tab" data-bs-target="#annotations" type="button" role="tab" aria-controls="annotations" aria-selected="false">Аннотации</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="notifications-tab" data-bs-toggle="tab" data-bs-target="#notifications" type="button" role="tab" aria-controls="notifications" aria-selected="false">Уведомления</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content mt-3">
+            <div class="tab-pane fade show active" id="requirements" role="tabpanel" aria-labelledby="requirements-tab">
+                <h3>Требования к курсу</h3>
+                <div id="courseRequirements"></div>
+            </div>
+            <div class="tab-pane fade" id="annotations" role="tabpanel" aria-labelledby="annotations-tab">
+                <h3>Аннотации курса</h3>
+                <div id="courseAnnotations"></div>
+            </div>
+            <div class="tab-pane fade" id="notifications" role="tabpanel" aria-labelledby="notifications-tab">
+                <ul id="notificationsList" class="list-group"></ul>
+            </div>
+        </div>
+
+        <ul class="nav nav-tabs mt-4" id="secondaryTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="teachers-tab" data-bs-toggle="tab" data-bs-target="#teachers" type="button" role="tab" aria-controls="teachers" aria-selected="true">Преподаватели</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="students-tab" data-bs-toggle="tab" data-bs-target="#students" type="button" role="tab" aria-controls="students" aria-selected="false">Студенты</button>
+            </li>
+        </ul>
+
+        <div class="tab-content mt-3">
+            <div class="tab-pane fade show active" id="teachers" role="tabpanel" aria-labelledby="teachers-tab">
+                <ul id="teachersList" class="list-group"></ul>
+            </div>
+            <div class="tab-pane fade" id="students" role="tabpanel" aria-labelledby="students-tab">
+                <ul id="studentsList" class="list-group"></ul>
+            </div>
+        </div>
+    </div>
+        <div id="modalContainer"></div>
+
+<div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="statusModalLabel">Изменить статус курса</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+        </div>
+        <div class="modal-body">
+          <form id="statusForm">
+            <div class="mb-3">
+              <label for="courseStatusSelect" class="form-label">Выберите новый статус:</label>
+              <select class="form-select" id="courseStatusSelect" required>
+                <option value="OpenForAssigning">Открыт для записи</option>
+                <option value="Started">В процессе обучения</option>
+                <option value="Finished">Закрыт</option>
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+          <button type="button" class="btn btn-primary" id="saveStatusBtn">Сохранить</button>
+        </div>
+      </div>
+    </div>
+  </div>
+<button class="btn btn-success" id="createNotificationBtn"style="display: none;">Создать уведомление</button>
+
+<div class="modal fade" id="createNotificationModal" tabindex="-1" aria-labelledby="createNotificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createNotificationModalLabel">Создать уведомление</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createNotificationForm">
+                    <div class="mb-3">
+                        <label for="notificationText" class="form-label">Текст уведомления:</label>
+                        <textarea class="form-control" id="notificationText" rows="3" required></textarea>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="isImportant">
+                        <label class="form-check-label" for="isImportant">
+                            Важное
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="saveNotificationBtn">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+<button class="btn btn-success" id="signUpCourseBtn" style="display: none;">Записаться на курс</button>
+
+<div class="modal fade" id="markModal" tabindex="-1" aria-labelledby="markModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="markModalLabel">Изменение отметки</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p id="markTypeLabel"></p> 
+          <p id="studentName"></p>
+          <div>
+            <button id="markPassedBtn" class="btn btn-success">Пройдено</button>
+            <button id="markFailedBtn" class="btn btn-danger">Завалено</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button id="deleteCourseBtn" class="btn btn-danger" style="display: none;">
+    Удалить курс
+</button>
+
+</body>
+</html>

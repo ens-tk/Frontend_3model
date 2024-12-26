@@ -1,0 +1,13 @@
+# Node.js
+node_modules/
+
+# Логи
+*.log
+
+# Файлы и папки операционной системы
+.DS_Store
+Thumbs.db
+
+# Папки IDE (например, VSCode)
+.vscode/
+.idea/
