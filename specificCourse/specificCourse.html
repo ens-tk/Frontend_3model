@@ -55,11 +55,9 @@
         
         <div class="tab-content mt-3">
             <div class="tab-pane fade show active" id="requirements" role="tabpanel" aria-labelledby="requirements-tab">
-                <h3>Требования к курсу</h3>
                 <div id="courseRequirements"></div>
             </div>
             <div class="tab-pane fade" id="annotations" role="tabpanel" aria-labelledby="annotations-tab">
-                <h3>Аннотации курса</h3>
                 <div id="courseAnnotations"></div>
             </div>
             <div class="tab-pane fade" id="notifications" role="tabpanel" aria-labelledby="notifications-tab">
@@ -166,6 +164,31 @@
   <button id="deleteCourseBtn" class="btn btn-danger" style="display: none;">
     Удалить курс
 </button>
+
+<button id="addTeacherBtn" class="btn btn-primary" style="display: none;">
+    Добавить преподавателя
+</button>
+
+<div class="modal fade" id="addTeacherModal" tabindex="-1" aria-labelledby="addTeacherModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTeacherModalLabel">Добавить преподавателя</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <select id="teacherSelect" class="form-select">
+                    <option value="" disabled selected>Выберите преподавателя</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="saveTeacherBtn">Добавить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 </body>
 </html>

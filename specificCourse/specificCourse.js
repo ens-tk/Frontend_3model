@@ -1,6 +1,7 @@
 const courseId = window.currentCourseId || localStorage.getItem('currentCourseId');
 const apiUrl = `https://camp-courses.api.kreosoft.space/courses/${courseId}/details`;
 let isTeacherOnCourse=false;
+let StatusCource=false;
 
 function updateCourseStatus(status) {
     const statusElement = document.getElementById("courseStatus");
@@ -50,7 +51,7 @@ async function fetchCourseDetails() {
 
         const semesterMapping = {
             Spring: "Весенний",
-            Fall: "Осенний",
+            Autumn: "Осенний",
         };
         const semester = semesterMapping[course.semester] || course.semester;
         document.getElementById("semester").textContent = semester;
@@ -59,18 +60,28 @@ async function fetchCourseDetails() {
         document.getElementById("studentsEnrolled").textContent = course.studentsEnrolledCount;
         document.getElementById("studentsInQueue").textContent = course.studentsInQueueCount;
 
-        document.getElementById("courseRequirements").innerHTML = course.requirements;
+        if (course.status === "OpenForAssigning") {
+            StatusCource = true;
+        } 
 
-        document.getElementById("courseAnnotations").innerHTML = course.annotations;
+        const requirementsElement = document.getElementById("courseRequirements");
+        requirementsElement.innerHTML = course.requirements || "<p>К сожалению, требования для этого курса не написаны.</p>";
 
+        const annotationsElement = document.getElementById("courseAnnotations");
+        annotationsElement.innerHTML = course.annotations || "<p>К сожалению, аннотация для этого курса не написана.</p>";
+        
         const notificationsList = document.getElementById("notificationsList");
         notificationsList.innerHTML = "";
-        course.notifications.forEach(notification => {
-            const listItem = document.createElement("li");
-            listItem.className = `list-group-item ${notification.isImportant ? "list-group-item-danger" : ""}`;
-            listItem.textContent = notification.text;
-            notificationsList.appendChild(listItem);
-        });
+        if (course.notifications.length === 0) {
+            notificationsList.innerHTML = "<p>Пока уведомлений нет.</p>";
+        } else {
+            course.notifications.forEach(notification => {
+                const listItem = document.createElement("li");
+                listItem.className = `list-group-item ${notification.isImportant ? "list-group-item-danger" : ""}`;
+                listItem.textContent = notification.text;
+                notificationsList.appendChild(listItem);
+            });
+        }
 
         const teachersList = document.getElementById("teachersList");
         teachersList.innerHTML = "";
@@ -81,77 +92,61 @@ async function fetchCourseDetails() {
             teachersList.appendChild(listItem);
         });
 
-const studentsList = document.getElementById("studentsList");
-studentsList.innerHTML = ""; 
-course.students.forEach(student => {
-    const listItem = document.createElement("li");
-    listItem.className = "list-group-item";
-    
-    let studentHtml = `
-        <strong>${student.name}</strong> (${student.email})<br>
-        Статус: ${student.status}<br>
-    `;
+        const studentsList = document.getElementById("studentsList");
+        studentsList.innerHTML = "";
 
-    if (student.midtermResult !== null) {
-        studentHtml += `
-            Результат в середине: <button class="btn btn-warning btn-sm editMarkBtn" data-type="Midterm" data-student-id="${student.id}">${student.midtermResult}</button><br>
-        `;
-    }
+        if (course.students.length === 0) {
+            studentsList.innerHTML = "<p>Пока нет студентов.</p>";
+        } else {
+            course.students.forEach(student => {
+                const listItem = document.createElement("li");
+                listItem.className = "list-group-item";
+                
+                let studentHtml = `
+                    <strong>${student.name}</strong> (${student.email})<br>
+                    Статус: ${student.status}<br>
+                `;
 
-    if (student.finalResult !== null) {
-        studentHtml += `
-            Итоговый результат: <button class="btn btn-warning btn-sm editMarkBtn" data-type="Final" data-student-id="${student.id}">${student.finalResult}</button><br>
-        `;
-    }
+                if (student.midtermResult !== null) {
+                    studentHtml += `
+                        Результат в середине: <button class="btn btn-warning btn-sm editMarkBtn" data-type="Midterm" data-student-id="${student.id}">${student.midtermResult}</button><br>
+                    `;
+                }
 
-    listItem.innerHTML = studentHtml;
+                if (student.finalResult !== null) {
+                    studentHtml += `
+                        Итоговый результат: <button class="btn btn-warning btn-sm editMarkBtn" data-type="Final" data-student-id="${student.id}">${student.finalResult}</button><br>
+                    `;
+                }
 
-    if (student.status === "InQueue") {
-        const acceptButton = document.createElement("button");
-        acceptButton.textContent = "Принять";
-        acceptButton.className = "btn btn-success btn-sm";
-        acceptButton.addEventListener("click", () => changeStudentStatus(student.id, "Accepted"));
+                listItem.innerHTML = studentHtml;
 
-        const declineButton = document.createElement("button");
-        declineButton.textContent = "Отклонить";
-        declineButton.className = "btn btn-danger btn-sm";
-        declineButton.addEventListener("click", () => changeStudentStatus(student.id, "Declined"));
+                if (student.status === "InQueue") {
+                    const acceptButton = document.createElement("button");
+                    acceptButton.textContent = "Принять";
+                    acceptButton.className = "btn btn-success btn-sm";
+                    acceptButton.addEventListener("click", () => changeStudentStatus(student.id, "Accepted"));
 
-        listItem.appendChild(acceptButton);
-        listItem.appendChild(declineButton);
-    }
+                    const declineButton = document.createElement("button");
+                    declineButton.textContent = "Отклонить";
+                    declineButton.className = "btn btn-danger btn-sm";
+                    declineButton.addEventListener("click", () => changeStudentStatus(student.id, "Declined"));
 
-    studentsList.appendChild(listItem);
-});
-document.querySelectorAll('.editMarkBtn').forEach(button => {
-    button.addEventListener('click', async (event) => {
-        const markType = event.target.getAttribute('data-type');
-        const studentId = event.target.getAttribute('data-student-id');
-        
-        const modal = new bootstrap.Modal(document.getElementById('markModal'));
-        const markTypeLabel = document.getElementById('markTypeLabel');
-        const studentName = document.getElementById('studentName');
+                    listItem.appendChild(acceptButton);
+                    listItem.appendChild(declineButton);
+                }
 
-        const student = course.students.find(s => s.id === studentId);
-        studentName.textContent = student.name; 
-        markTypeLabel.textContent = `Изменение отметки для ${markType === 'Midterm' ? 'промежуточной' : 'итоговой'} оценки`;
+                studentsList.appendChild(listItem);
+            });
+        }
 
-        document.getElementById('markPassedBtn').onclick = () => updateStudentMark(studentId, markType, 'Passed');
-        document.getElementById('markFailedBtn').onclick = () => updateStudentMark(studentId, markType, 'Failed');
-
-        modal.show();
-    });
-});
-
-
-
-
-        return course; 
+        return course;
 
     } catch (error) {
         console.error("Ошибка при получении данных о курсе:", error);
     }
 }
+
 
 async function getUserRoles() {
     try {
@@ -386,7 +381,7 @@ async function checkUserRole() {
             
         });
 
-        if (!response.ok) {
+        if (!response.ok & StatusCource) {
             document.getElementById("signUpCourseBtn").style.display = "block"; 
         }
         if (roles.isAdmin) {
@@ -396,6 +391,8 @@ async function checkUserRole() {
             document.getElementById("editCourseBtn").style.display = "block";
             document.getElementById("changeStatusBtn").style.display = "block"; 
             document.getElementById("createNotificationBtn").style.display = "block"; 
+            
+            document.getElementById("addTeacherBtn").style.display = "block"; 
         } 
     } catch (error) {
         console.error('Ошибка при проверке доступности записи на курс:', error);
@@ -403,7 +400,73 @@ async function checkUserRole() {
 }
 
 
+async function fetchTeachers() {
+    try {
+        const teachers = await fetchUsers();
+        const teacherSelect = document.getElementById("teacherSelect");
+        teacherSelect.innerHTML = `<option value="" disabled selected>Выберите преподавателя</option>`;
+        teachers.forEach(teacher => {
+            const option = document.createElement("option");
+            option.value = teacher.id;
+            option.textContent = teacher.fullName;
+            teacherSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error("Ошибка загрузки списка преподавателей:", error);
+    }
+}
 
+
+async function addTeacherToCourse(teacherId) {
+    const courseId = window.currentCourseId || localStorage.getItem("currentCourseId");
+    const apiUrl = `https://camp-courses.api.kreosoft.space/courses/${courseId}/teachers`;
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("authToken")}`
+            },
+            body: JSON.stringify({ userId: teacherId })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            let errorMessage = "Не удалось добавить преподавателя";
+
+            if (errorData.message === "This user is already teaching at this course.") {
+                errorMessage = "Этот пользователь уже является преподавателем на этом курсе";
+            }
+
+            throw new Error(errorMessage);
+        }
+
+        Swal.fire("Успех", "Преподаватель успешно добавлен на курс", "success");
+        fetchCourseDetails();
+    } catch (error) {
+        console.error("Ошибка при добавлении преподавателя:", error);
+        Swal.fire("Ошибка", error.message || "Не удалось добавить преподавателя", "error");
+    }
+}
+
+document.getElementById("addTeacherBtn").addEventListener("click", async () => {
+    await fetchTeachers();
+    const modal = new bootstrap.Modal(document.getElementById("addTeacherModal"));
+    modal.show();
+});
+
+document.getElementById("saveTeacherBtn").addEventListener("click", async () => {
+    const teacherSelect = document.getElementById("teacherSelect");
+    const selectedTeacherId = teacherSelect.value;
+    if (!selectedTeacherId) {
+        Swal.fire("Ошибка", "Выберите преподавателя перед добавлением", "warning");
+        return;
+    }
+    await addTeacherToCourse(selectedTeacherId);
+    const modalInstance = bootstrap.Modal.getInstance(document.getElementById("addTeacherModal"));
+    modalInstance.hide();
+});
 document.getElementById("saveStatusBtn").addEventListener("click", async () => {
     const statusSelect = document.getElementById("courseStatusSelect");
     const newStatus = statusSelect.value;
@@ -419,17 +482,32 @@ document.getElementById("saveStatusBtn").addEventListener("click", async () => {
         });
 
         if (!response.ok) {
-            throw new Error(`Ошибка: ${await response.text()}`);
+            const errorText = await response.text();
+            throw new Error(`Ошибка: ${errorText}`);
         }
 
-        Swal.fire('Успех', 'Статус курса успешно обновлен', 'success');
-        updateCourseStatus(newStatus); 
-        const modal = bootstrap.Modal.getInstance(document.getElementById("statusModal"));
-        modal.hide(); 
+        Swal.fire('Успех', 'Статус курса успешно обновлен', 'success').then(() => {
+            const modal = bootstrap.Modal.getInstance(document.getElementById("statusModal"));
+            if (modal) modal.hide();
+
+            document.body.classList.remove('modal-open');
+            const backdrops = document.querySelectorAll('.modal-backdrop'); 
+            backdrops.forEach(backdrop => backdrop.remove());
+        });
+
+        updateCourseStatus(newStatus);
     } catch (error) {
-        Swal.fire('Ошибка', error.message || 'Не удалось обновить статус курса', 'error');
+        console.log(error.message);
+
+        let errorMessage = error.message;
+        if (errorMessage.includes("Course status cannot be changed to a previous one.")) {
+            errorMessage = "Статус курса не может быть изменён на предыдущий.";
+        }
+
+        Swal.fire('Ошибка', errorMessage || 'Не удалось обновить статус курса', 'error');
     }
 });
+
 
 async function createNotification() {
     const notificationText = document.getElementById("notificationText").value;
@@ -461,7 +539,12 @@ async function createNotification() {
 
         fetchCourseDetails();
     } catch (error) {
-        Swal.fire('Ошибка', error.message || 'Не удалось создать уведомление', 'error');
+        console.log(error.message)
+        let errorMessage = error.message;
+        if (errorMessage.includes("Notification text id required.")) {
+            errorMessage = "Вы не ввели текст уведомления.";
+        }
+        Swal.fire('Ошибка', errorMessage || 'Не удалось создать уведомление', 'error');
     }
 }
 
