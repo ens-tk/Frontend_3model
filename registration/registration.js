@@ -54,22 +54,20 @@ form.addEventListener('submit', async (event) => {
 
             let errorMessages = [];
 
-            if (error.DuplicateUserName) {
-                errorMessages.push('Указанный адрес электронной почты уже зарегистрирован. Используйте другой.');
+            if (error.errors) {
+                if (error.errors.BirthDate) {
+                    errorMessages.push('Некорректная дата рождения. Проверьте формат или укажите корректную дату.');
+                }
+
+                for (const key in error.errors) {
+                    if (error.errors.hasOwnProperty(key) && key !== 'BirthDate') {
+                        errorMessages.push(...error.errors[key]);
+                    }
+                }
             }
 
             if (error.errors && error.errors.Password) {
                 errorMessages.push('Пароль должен быть строкой длиной не менее 6 символов.');
-            }
-
-            if (error.errors) {
-                for (const key in error.errors) {
-                    if (error.errors.hasOwnProperty(key)) {
-                        if (key !== 'Password') {
-                            errorMessages.push(...error.errors[key]);
-                        }
-                    }
-                }
             }
 
             if (errorMessages.length > 0) {
@@ -79,6 +77,12 @@ form.addEventListener('submit', async (event) => {
                 errorMessage.innerText = 'Ошибка регистрации: некорректные данные.';
                 errorMessage.classList.remove('d-none');
             }
+        } else if (response.status === 409) { 
+            const error = await response.json();
+            console.error('Ошибка регистрации:', error);
+
+            errorMessage.innerHTML = `<div>Пользователь с таким email уже зарегистрирован. Используйте другой адрес электронной почты.</div>`;
+            errorMessage.classList.remove('d-none');
         } else {
             const error = await response.json();
             alert(`Ошибка: ${error.message || 'Неизвестная ошибка'}`);

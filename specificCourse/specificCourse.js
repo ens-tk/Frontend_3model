@@ -381,7 +381,7 @@ async function checkUserRole() {
             
         });
 
-        if (!response.ok & StatusCource) {
+        if (!response.ok && StatusCource) {
             document.getElementById("signUpCourseBtn").style.display = "block"; 
         }
         if (roles.isAdmin) {
@@ -391,7 +391,7 @@ async function checkUserRole() {
             document.getElementById("editCourseBtn").style.display = "block";
             document.getElementById("changeStatusBtn").style.display = "block"; 
             document.getElementById("createNotificationBtn").style.display = "block"; 
-            
+            document.getElementById("signUpCourseBtn").style.display = "none"; 
             document.getElementById("addTeacherBtn").style.display = "block"; 
         } 
     } catch (error) {

@@ -39,12 +39,15 @@ const routes = {
     teachingCourses: {
       template: '/teachingCourses/teachingCourses.html',
       script: '/teachingCourses/teachingCourses.js'
+    },
+    main: {
+      template: '/main.html'
     }
   };
   
 function loadPage() {
     const contentDiv = document.getElementById('content');
-    const hash = window.location.hash.substring(1) || 'login';
+    const hash = window.location.hash.substring(1) || 'main';
 
     const [routeName, params] = hash.split('/');
 
