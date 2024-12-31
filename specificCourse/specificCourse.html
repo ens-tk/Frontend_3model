@@ -181,5 +181,34 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="markModal" tabindex="-1" aria-labelledby="markModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="markModalLabel">Изменение отметки</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="markTypeLabel"></p> 
+                    <p id="studentName"></p> 
+                    <div>
+                        <label>
+                            <input type="radio" id="markPassedRadio" name="markRadio" value="Passed"> Пройдено
+                        </label>
+                        <label>
+                            <input type="radio" id="markFailedRadio" name="markRadio" value="Failed"> Завалено
+                        </label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="saveMarkBtn" class="btn btn-primary">Сохранить</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отменить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+  
 </body>
 </html>

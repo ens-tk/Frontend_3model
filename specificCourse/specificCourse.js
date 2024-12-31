@@ -138,6 +138,53 @@ async function fetchCourseDetails() {
 
                 studentsList.appendChild(listItem);
             });
+            document.querySelectorAll('.editMarkBtn').forEach(button => {
+                button.addEventListener('click', async (event) => {
+                    const markType = event.target.getAttribute('data-type');
+                    const studentId = event.target.getAttribute('data-student-id');
+                    
+                    // Открываем модальное окно для редактирования оценки
+                    const modal = new bootstrap.Modal(document.getElementById('markModal'));
+                    const markTypeLabel = document.getElementById('markTypeLabel');
+                    const studentName = document.getElementById('studentName');
+                
+                    const student = course.students.find(s => s.id === studentId);
+                    studentName.textContent = student.name; // Устанавливаем имя студента
+                    markTypeLabel.textContent = `Изменение отметки для ${markType === 'Midterm' ? 'промежуточной' : 'итоговой'} оценки`;
+            
+                    // Состояние для текущей выбранной оценки
+                    let currentMark = null;
+            
+                    // Радиокнопки
+                    const markPassedRadio = document.getElementById('markPassedRadio');
+                    const markFailedRadio = document.getElementById('markFailedRadio');
+            
+                    markPassedRadio.checked = false;
+                    markFailedRadio.checked = false;
+            
+                    // Устанавливаем обработчик для изменения радиокнопки
+                    const onMarkChange = (event) => {
+                        currentMark = event.target.value;  // Обновляем текущую выбранную оценку
+                    };
+            
+                    // Добавляем обработчик событий для выбора оценки
+                    markPassedRadio.addEventListener('change', onMarkChange);
+                    markFailedRadio.addEventListener('change', onMarkChange);
+            
+                    // Обработчик кнопки "Сохранить"
+                    document.getElementById('saveMarkBtn').addEventListener('click', () => {
+                        if (currentMark) {
+                            updateStudentMark(studentId, markType, currentMark);  // Обновляем оценку
+                            modal.hide();
+                        } else {
+                            Swal.fire('Ошибка', 'Пожалуйста, выберите отметку', 'error');
+                        }
+                    });
+            
+                    modal.show();
+                });
+            });
+            
         }
 
         return course;
@@ -202,8 +249,8 @@ async function updateStudentMark(studentId, markType, mark) {
                 Authorization: `Bearer ${localStorage.getItem('authToken')}`,
             },
             body: JSON.stringify({
-                markType: markType,  
-                mark: mark  
+                markType: markType,
+                mark: mark
             })
         });
 
