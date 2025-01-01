@@ -1,7 +1,7 @@
 const courseId = window.currentCourseId || localStorage.getItem('currentCourseId');
 const apiUrl = `https://camp-courses.api.kreosoft.space/courses/${courseId}/details`;
 let isTeacherOnCourse=false;
-let StatusCource=false;
+let statusCource=false;
 
 function updateCourseStatus(status) {
     const statusElement = document.getElementById("courseStatus");
@@ -61,7 +61,7 @@ async function fetchCourseDetails() {
         document.getElementById("studentsInQueue").textContent = course.studentsInQueueCount;
 
         if (course.status === "OpenForAssigning") {
-            StatusCource = true;
+            statusCource = true;
         } 
 
         const requirementsElement = document.getElementById("courseRequirements");
@@ -143,38 +143,32 @@ async function fetchCourseDetails() {
                     const markType = event.target.getAttribute('data-type');
                     const studentId = event.target.getAttribute('data-student-id');
                     
-                    // Открываем модальное окно для редактирования оценки
                     const modal = new bootstrap.Modal(document.getElementById('markModal'));
                     const markTypeLabel = document.getElementById('markTypeLabel');
                     const studentName = document.getElementById('studentName');
                 
                     const student = course.students.find(s => s.id === studentId);
-                    studentName.textContent = student.name; // Устанавливаем имя студента
+                    studentName.textContent = student.name;
                     markTypeLabel.textContent = `Изменение отметки для ${markType === 'Midterm' ? 'промежуточной' : 'итоговой'} оценки`;
             
-                    // Состояние для текущей выбранной оценки
                     let currentMark = null;
             
-                    // Радиокнопки
                     const markPassedRadio = document.getElementById('markPassedRadio');
                     const markFailedRadio = document.getElementById('markFailedRadio');
             
                     markPassedRadio.checked = false;
                     markFailedRadio.checked = false;
             
-                    // Устанавливаем обработчик для изменения радиокнопки
                     const onMarkChange = (event) => {
-                        currentMark = event.target.value;  // Обновляем текущую выбранную оценку
+                        currentMark = event.target.value;
                     };
             
-                    // Добавляем обработчик событий для выбора оценки
                     markPassedRadio.addEventListener('change', onMarkChange);
                     markFailedRadio.addEventListener('change', onMarkChange);
             
-                    // Обработчик кнопки "Сохранить"
                     document.getElementById('saveMarkBtn').addEventListener('click', () => {
                         if (currentMark) {
-                            updateStudentMark(studentId, markType, currentMark);  // Обновляем оценку
+                            updateStudentMark(studentId, markType, currentMark);  
                             modal.hide();
                         } else {
                             Swal.fire('Ошибка', 'Пожалуйста, выберите отметку', 'error');
@@ -419,32 +413,45 @@ async function loadModal() {
 async function checkUserRole() {
     try {
         const roles = await getUserRoles();
-        const response = await fetch(`https://camp-courses.api.kreosoft.space/courses/${courseId}/sign-up`, {
-            method: 'POST',
+        const courseId = window.currentCourseId || localStorage.getItem("currentCourseId");
+
+        const myCoursesResponse = await fetch('https://camp-courses.api.kreosoft.space/courses/my', {
+            method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-            }
-            
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+            },
         });
 
-        if (!response.ok && StatusCource) {
-            document.getElementById("signUpCourseBtn").style.display = "block"; 
+        if (!myCoursesResponse.ok) {
+            throw new Error('Ошибка загрузки данных о курсах пользователя');
         }
+
+        const myCourses = await myCoursesResponse.json();
+        const isSignedUpForCurrentCourse = myCourses.some(course => course.id === courseId);
+
+        if (!isSignedUpForCurrentCourse && statusCource) {
+            document.getElementById("signUpCourseBtn").style.display = "block"; 
+        } else {
+            document.getElementById("signUpCourseBtn").style.display = "none"; 
+        }
+
         if (roles.isAdmin) {
             document.getElementById("deleteCourseBtn").style.display = "block";
         }
-        if (roles.isAdmin || isTeacherOnCourse) {
+
+        if (roles.isAdmin || roles.isTeacherOnCourse) {
             document.getElementById("editCourseBtn").style.display = "block";
-            document.getElementById("changeStatusBtn").style.display = "block"; 
-            document.getElementById("createNotificationBtn").style.display = "block"; 
-            document.getElementById("signUpCourseBtn").style.display = "none"; 
-            document.getElementById("addTeacherBtn").style.display = "block"; 
-        } 
+            document.getElementById("changeStatusBtn").style.display = "block";
+            document.getElementById("createNotificationBtn").style.display = "block";
+            document.getElementById("addTeacherBtn").style.display = "block";
+
+            document.getElementById("signUpCourseBtn").style.display = "none";
+        }
     } catch (error) {
         console.error('Ошибка при проверке доступности записи на курс:', error);
     }
 }
+
 
 
 async function fetchTeachers() {
@@ -626,6 +633,7 @@ document.getElementById("signUpCourseBtn").addEventListener("click", async () =>
         }
 
         Swal.fire('Успех', 'Вы успешно записались на курс', 'success');
+        checkUserRole();
     } catch (error) {
         console.error('Ошибка при записи на курс:', error);
         Swal.fire('Ошибка', 'Не удалось записаться на курс', 'error');
