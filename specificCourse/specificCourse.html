@@ -167,12 +167,9 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="addTeacherForm">
-                        <div class="mb-3">
-                            <label for="teacherName" class="form-label">Имя преподавателя:</label>
-                            <input type="text" class="form-control" id="teacherName" required>
-                        </div>
-                    </form>
+                    <select id="teacherSelect" class="form-select">
+                        <option value="" disabled selected>Выберите преподавателя</option>
+                    </select>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
@@ -181,6 +178,7 @@
             </div>
         </div>
     </div>
+
 
     <div class="modal fade" id="markModal" tabindex="-1" aria-labelledby="markModalLabel" aria-hidden="true">
         <div class="modal-dialog">

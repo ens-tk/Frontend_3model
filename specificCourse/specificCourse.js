@@ -1,6 +1,7 @@
 const courseId = window.currentCourseId || localStorage.getItem('currentCourseId');
 const apiUrl = `https://camp-courses.api.kreosoft.space/courses/${courseId}/details`;
 let isTeacherOnCourse=false;
+let isMainTeacher = false;
 let statusCource=false;
 
 function updateCourseStatus(status) {
@@ -43,6 +44,11 @@ async function fetchCourseDetails() {
         console.log(course);
         isTeacherOnCourse = course.teachers.some(teacher => teacher.email === localStorage.getItem('email'));
         document.getElementById("courseName").textContent = course.name;
+
+        const currEmail = localStorage.getItem('email');
+        const mainTeacher = course.teachers.find(teacher => teacher.isMain);
+        isMainTeacher = mainTeacher && mainTeacher.email === currEmail;
+
 
         const mainYear = `${course.startYear}-${course.startYear + 1}`;
         document.getElementById("courseYear").textContent = mainYear;
@@ -107,16 +113,20 @@ async function fetchCourseDetails() {
                     Статус: ${student.status}<br>
                 `;
 
-                if (student.midtermResult !== null) {
-                    studentHtml += `
-                        Результат в середине: <button class="btn btn-warning btn-sm editMarkBtn" data-type="Midterm" data-student-id="${student.id}">${student.midtermResult}</button><br>
-                    `;
+                if (student.status === "Accepted") {
+                    if (student.midtermResult !== null) {
+                        studentHtml += `
+                            Результат в середине: <button class="btn btn-warning btn-sm editMarkBtn" data-type="Midterm" data-student-id="${student.id}">${student.midtermResult}</button><br>
+                        `;
+                    }
                 }
-
-                if (student.finalResult !== null) {
-                    studentHtml += `
-                        Итоговый результат: <button class="btn btn-warning btn-sm editMarkBtn" data-type="Final" data-student-id="${student.id}">${student.finalResult}</button><br>
-                    `;
+                
+                if (student.status === "Accepted") {
+                    if (student.finalResult !== null) {
+                        studentHtml += `
+                            Итоговый результат: <button class="btn btn-warning btn-sm editMarkBtn" data-type="Final" data-student-id="${student.id}">${student.finalResult}</button><br>
+                        `;
+                    }
                 }
 
                 listItem.innerHTML = studentHtml;
@@ -439,13 +449,15 @@ async function checkUserRole() {
             document.getElementById("deleteCourseBtn").style.display = "block";
         }
 
-        if (roles.isAdmin || roles.isTeacherOnCourse) {
+        if (roles.isAdmin || isTeacherOnCourse) {
             document.getElementById("editCourseBtn").style.display = "block";
             document.getElementById("changeStatusBtn").style.display = "block";
             document.getElementById("createNotificationBtn").style.display = "block";
-            document.getElementById("addTeacherBtn").style.display = "block";
 
             document.getElementById("signUpCourseBtn").style.display = "none";
+        }
+        if (roles.isAdmin || isMainTeacher){
+            document.getElementById("addTeacherBtn").style.display = "block";
         }
     } catch (error) {
         console.error('Ошибка при проверке доступности записи на курс:', error);
