@@ -63,11 +63,15 @@ async function saveProfile(event) {
             const error = await response.json();
             console.error('Ошибка 400 при сохранении профиля:', error);
 
-            if (error.errors) {
-                const errorMessages = Object.entries(error.errors)
-                    .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
-                    .join('\n');
-                showToast(`Ошибка сохранения профиля:\n${errorMessages}`, 'error');
+            if (error.errors && error.errors.BirthDate) {
+                const errorMessages = error.errors.BirthDate.map(message => {
+                    if (message === 'Birth date cannot be later than today') {
+                        return 'Ошибка: Дата рождения указана в будущем';
+                    }
+                    return message;
+                }).join(', ');
+
+                showToast(errorMessages, 'error');
             } else {
                 showToast('Ошибка сохранения профиля: Некорректные данные.', 'error');
             }
