@@ -12,6 +12,29 @@
             justify-content: center;
             margin-top: 20px;
         }
+
+        .card-body {
+            padding: 1rem;
+        }
+
+        @media (max-width: 767px) {
+            .card-body {
+                padding: 0.5rem;
+            }
+
+            h5.card-title {
+                font-size: 1rem;
+            }
+
+            .btn {
+                font-size: 0.875rem;
+            }
+
+            .nav-tabs {
+                padding-left: 0;
+                padding-right: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -20,37 +43,72 @@
             <h1 id="courseName" class="text-center">Название курса</h1>
             <button class="btn btn-primary" id="editCourseBtn" style="display: none;">Редактировать курс</button>
         </div>
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <p><strong>Основной год:</strong> <span id="courseYear">2026-2027</span></p>
-            </div>
-            <div class="col-md-6 d-flex align-items-center">
-                <p class="mb-0"><strong>Статус курса:</strong> <span id="courseStatus" class="badge"></span></p>
-                <button class="btn btn-link ms-3" id="changeStatusBtn" style="display: none;" data-bs-toggle="modal" data-bs-target="#statusModal">Изменить</button>
-            </div>
-        </div>
-
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <p><strong>Семестр:</strong> <span id="semester">Осенний</span></p>
-            </div>
-        </div>
-
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <p><strong>Места:</strong> <span id="availableSpots">30</span></p>
-            </div>
-            <div class="col-md-6">
-                <p><strong>Зачислено студентов:</strong> <span id="studentsEnrolled">12</span></p>
-            </div>
-        </div>
         
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <p><strong>Студентов на рассмотрении:</strong> <span id="studentsInQueue">5</span></p>
+        <div class="row g-0 mb-2">
+            <div class="col-12">
+                <div class="card h-100 d-flex flex-column">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title">Статус курса</h5>
+                            <p id="courseStatus" class="badge">Активен</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-success" id="signUpCourseBtn" style="display: none;">Записаться на курс</button>
+                            <button class="btn btn-warning" id="changeStatusBtn" style="display: none;" data-bs-toggle="modal" data-bs-target="#statusModal">Изменить</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-
+    
+        <div class="row g-0 mb-2">
+            <div class="col-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Основной год</h5>
+                        <p class="card-text" id="courseYear">2026-2027</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Семестр</h5>
+                        <p class="card-text" id="semester">Осенний</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="row g-0 mb-2">
+            <div class="col-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Места</h5>
+                        <p class="card-text" id="availableSpots">30</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Зачислено студентов</h5>
+                        <p class="card-text" id="studentsEnrolled">12</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="row g-0 mb-2">
+            <div class="col-12">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Студентов на рассмотрении</h5>
+                        <p class="card-text" id="studentsInQueue">5</p>
+                    </div>
+                </div>
+            </div>
+        </div>
         <ul class="nav nav-tabs" id="courseTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="requirements-tab" data-bs-toggle="tab" data-bs-target="#requirements" type="button" role="tab" aria-controls="requirements" aria-selected="true">Требования</button>
@@ -102,7 +160,6 @@
         <div id="modalContainer"></div>
 
         <div class="button-group">
-            <button class="btn btn-success" id="signUpCourseBtn" style="display: none;">Записаться на курс</button>
             <button class="btn btn-danger" id="deleteCourseBtn" style="display: none;">Удалить курс</button>
         </div>
     </div>

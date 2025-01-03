@@ -115,32 +115,32 @@ async function fetchCourseDetails() {
                 if (student.status === "Accepted") {
                     if (student.midtermResult !== null) {
                         studentHtml += `
-                            Результат в середине: <button class="btn btn-warning btn-sm editMarkBtn" data-type="Midterm" data-student-id="${student.id}">${student.midtermResult}</button><br>
+                            Результат в середине: <button class="btn btn-warning btn-sm editMarkBtn ms-2 mt-2" data-type="Midterm" data-student-id="${student.id}">${getMarkStatus(student.midtermResult)}</button><br>
                         `;
                     }
                 }
-                
+
                 if (student.status === "Accepted") {
                     if (student.finalResult !== null) {
                         studentHtml += `
-                            Итоговый результат: <button class="btn btn-warning btn-sm editMarkBtn" data-type="Final" data-student-id="${student.id}">${student.finalResult}</button><br>
+                            Итоговый результат: <button class="btn btn-warning btn-sm editMarkBtn ms-2 mt-2" data-type="Final" data-student-id="${student.id}">${getMarkStatus(student.finalResult)}</button><br>
                         `;
                     }
-                }
+                }                        
 
                 listItem.innerHTML = studentHtml;
 
                 if (student.status === "InQueue") {
                     const acceptButton = document.createElement("button");
                     acceptButton.textContent = "Принять";
-                    acceptButton.className = "btn btn-success btn-sm";
+                    acceptButton.className = "btn btn-success btn-sm ms-2";
                     acceptButton.addEventListener("click", () => changeStudentStatus(student.id, "Accepted"));
-
+                
                     const declineButton = document.createElement("button");
                     declineButton.textContent = "Отклонить";
-                    declineButton.className = "btn btn-danger btn-sm";
+                    declineButton.className = "btn btn-danger btn-sm ms-2";
                     declineButton.addEventListener("click", () => changeStudentStatus(student.id, "Declined"));
-
+                
                     listItem.appendChild(acceptButton);
                     listItem.appendChild(declineButton);
                 }
@@ -208,6 +208,17 @@ function getStudentStatus(status) {
         default:
             return status;
     }
+}
+
+function getMarkStatus(result) {
+    if (result === "NotDefined") {
+        return "Не определено";
+    } else if (result === "Passed") {
+        return "Пройдено";
+    } else if (result === "Failed") {
+        return "Завалено";
+    }
+    return result;
 }
 
 
