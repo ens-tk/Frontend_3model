@@ -71,6 +71,9 @@
                 <div id="courseAnnotations"></div>
             </div>
             <div class="tab-pane fade" id="notifications" role="tabpanel" aria-labelledby="notifications-tab">
+                <div class="text-center mt-3 mb-4">
+                    <button class="btn btn-success" id="createNotificationBtn" style="display: none;">Создать уведомление</button>
+                </div>
                 <ul id="notificationsList" class="list-group"></ul>
             </div>
         </div>
@@ -86,6 +89,9 @@
 
         <div class="tab-content mt-3">
             <div class="tab-pane fade show active" id="teachers" role="tabpanel" aria-labelledby="teachers-tab">
+                <div class="text-center mt-3 mb-4">
+                    <button class="btn btn-success" id="addTeacherBtn" style="display: none;">Добавить преподавателя</button>
+                </div>
                 <ul id="teachersList" class="list-group"></ul>
             </div>
             <div class="tab-pane fade" id="students" role="tabpanel" aria-labelledby="students-tab">
@@ -96,10 +102,8 @@
         <div id="modalContainer"></div>
 
         <div class="button-group">
-            <button class="btn btn-success" id="createNotificationBtn" style="display: none;">Создать уведомление</button>
             <button class="btn btn-success" id="signUpCourseBtn" style="display: none;">Записаться на курс</button>
             <button class="btn btn-danger" id="deleteCourseBtn" style="display: none;">Удалить курс</button>
-            <button class="btn btn-primary" id="addTeacherBtn" style="display: none;">Добавить преподавателя</button>
         </div>
     </div>
 
