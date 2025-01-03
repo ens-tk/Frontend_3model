@@ -49,7 +49,6 @@ async function fetchCourseDetails() {
         const mainTeacher = course.teachers.find(teacher => teacher.isMain);
         isMainTeacher = mainTeacher && mainTeacher.email === currEmail;
 
-
         const mainYear = `${course.startYear}-${course.startYear + 1}`;
         document.getElementById("courseYear").textContent = mainYear;
 
@@ -68,14 +67,14 @@ async function fetchCourseDetails() {
 
         if (course.status === "OpenForAssigning") {
             statusCource = true;
-        } 
+        }
 
         const requirementsElement = document.getElementById("courseRequirements");
         requirementsElement.innerHTML = course.requirements || "<p>К сожалению, требования для этого курса не написаны.</p>";
 
         const annotationsElement = document.getElementById("courseAnnotations");
         annotationsElement.innerHTML = course.annotations || "<p>К сожалению, аннотация для этого курса не написана.</p>";
-        
+
         const notificationsList = document.getElementById("notificationsList");
         notificationsList.innerHTML = "";
         if (course.notifications.length === 0) {
@@ -108,9 +107,9 @@ async function fetchCourseDetails() {
                 const listItem = document.createElement("li");
                 listItem.className = "list-group-item";
                 
-                let studentHtml = `
+                let studentHtml = ` 
                     <strong>${student.name}</strong> (${student.email})<br>
-                    Статус: ${student.status}<br>
+                    Статус: ${getStudentStatus(student.status)}<br>
                 `;
 
                 if (student.status === "Accepted") {
@@ -148,6 +147,7 @@ async function fetchCourseDetails() {
 
                 studentsList.appendChild(listItem);
             });
+
             document.querySelectorAll('.editMarkBtn').forEach(button => {
                 button.addEventListener('click', async (event) => {
                     const markType = event.target.getAttribute('data-type');
@@ -188,7 +188,6 @@ async function fetchCourseDetails() {
                     modal.show();
                 });
             });
-            
         }
 
         return course;
@@ -197,6 +196,20 @@ async function fetchCourseDetails() {
         console.error("Ошибка при получении данных о курсе:", error);
     }
 }
+
+function getStudentStatus(status) {
+    switch (status) {
+        case "Accepted":
+            return "Принят";
+        case "InQueue":
+            return "В ожидании принятия решения";
+        case "Declined":
+            return "Не принят";
+        default:
+            return status;
+    }
+}
+
 
 
 async function getUserRoles() {
@@ -230,16 +243,24 @@ async function changeStudentStatus(studentId, newStatus) {
         });
 
         if (!response.ok) {
-            throw new Error('Не удалось обновить статус студента');
+            const errorData = await response.json();
+            let errorMessage = 'Не удалось обновить статус студента';
+
+            if (errorData.message === "Maximum student count reached.") {
+                errorMessage = 'На этом курсе все места заняты, поэтому нельзя добавить нового ученика';
+            }
+
+            throw new Error(errorMessage);
         }
 
         Swal.fire('Успех', `Статус студента изменен на ${newStatus}`, 'success');
         fetchCourseDetails();
     } catch (error) {
         console.error('Ошибка при изменении статуса студента:', error);
-        Swal.fire('Ошибка', 'Не удалось изменить статус студента', 'error');
+        Swal.fire('Ошибка', error.message || 'Не удалось изменить статус студента', 'error');
     }
 }
+
 
 async function updateStudentMark(studentId, markType, mark) {
     try {
@@ -293,7 +314,7 @@ async function loadModal() {
         const isAdmin = roles.isAdmin;
         const isTeacher = isTeacherOnCourse;
 
-        const modalFile = isTeacher ? 'CourseModalForTeacher.html' : 'CourseModal.html';
+        const modalFile = isAdmin ? 'CourseModal.html' : 'CourseModalForTeacher.html';
         const response = await fetch(modalFile);
 
         if (!response.ok) {
@@ -350,7 +371,7 @@ async function loadModal() {
             $(courseAnnotationInput).summernote('code', course.annotations);
         }
 
-        document.getElementById(isTeacher ? 'courseForm2' : 'courseForm').addEventListener('submit', async (event) => {
+        document.getElementById(isAdmin ? 'courseForm' : 'courseForm2').addEventListener('submit', async (event) => {
             event.preventDefault();
 
             if (isAdmin) {
@@ -503,6 +524,8 @@ async function addTeacherToCourse(teacherId) {
 
             if (errorData.message === "This user is already teaching at this course.") {
                 errorMessage = "Этот пользователь уже является преподавателем на этом курсе";
+            } else if (errorData.message === "Cannot assign teacher role to a student already attending the course.") {
+                errorMessage = "Этот пользователь уже является студентом на курсе, поэтому его нельзя добавить как преподавателя";
             }
 
             throw new Error(errorMessage);
@@ -515,6 +538,7 @@ async function addTeacherToCourse(teacherId) {
         Swal.fire("Ошибка", error.message || "Не удалось добавить преподавателя", "error");
     }
 }
+
 
 document.getElementById("addTeacherBtn").addEventListener("click", async () => {
     await fetchTeachers();
@@ -645,6 +669,7 @@ document.getElementById("signUpCourseBtn").addEventListener("click", async () =>
         }
 
         Swal.fire('Успех', 'Вы успешно записались на курс', 'success');
+        fetchCourseDetails();
         checkUserRole();
     } catch (error) {
         console.error('Ошибка при записи на курс:', error);
